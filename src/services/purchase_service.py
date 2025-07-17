@@ -2,7 +2,6 @@ from src.database.db_manager import DatabaseManager
 from src.models.purchase import Purchase
 from src.models.event import Event
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.sql import text
 from datetime import datetime
 
 class PurchaseService:
@@ -97,17 +96,34 @@ class PurchaseService:
         finally:
             session.close()
 
-    def check_existing_purchase(self, buyer_name, event_id, unit_price):
-        """Verifica se o comprador já tem uma compra para o evento com o mesmo preço"""
+    def check_existing_purchase(self, buyer_name, event_id, unit_price, payment_method):
+        """Verifica se o comprador já tem uma compra para o evento com o mesmo preço e método de pagamento"""
         session = self.db_manager.get_session()
         try:
             existing_purchase = session.query(Purchase).filter_by(
                 buyer_name=buyer_name,
                 event_id=event_id,
-                unit_price=unit_price
+                unit_price=unit_price,
+                payment_method=payment_method
             ).first()
-            return existing_purchase is not None
+            return existing_purchase  # Return the Purchase object or None
         except SQLAlchemyError as e:
             raise Exception(f"Erro ao verificar compra existente: {e}")
+        finally:
+            session.close()
+
+    def update_purchase_quantity(self, purchase_id, new_quantity):
+        """Atualiza a quantidade de ingressos de uma compra existente"""
+        session = self.db_manager.get_session()
+        try:
+            purchase = session.query(Purchase).filter_by(id=purchase_id).first()
+            if purchase:
+                purchase.ticket_quantity = new_quantity
+                session.commit()
+                return True
+            return False
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise Exception(f"Erro ao atualizar quantidade da compra: {e}")
         finally:
             session.close()
