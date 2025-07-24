@@ -56,7 +56,6 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Eventos Igreja - Gerenciamento de Compras")
-        self.setGeometry(100, 100, 1000, 600)
 
         # Widget principal
         central_widget = QWidget()
@@ -171,6 +170,9 @@ class MainWindow(QMainWindow):
         # Verificar eventos e desativar campos
         self.populate_event_combo()
         self.check_and_toggle_inputs()
+
+        # Expandir janela
+        self.showMaximized()
 
     def load_buyer_names(self):
         """Carrega os nomes dos compradores da base de dados ao iniciar"""
